@@ -1,0 +1,54 @@
+<!DOCTYPE>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<title>Chat</title>
+	</head>
+	<body>
+
+		<div class="chat">
+			<ul>
+				<!-- Can track by DB id if message persistance is used -->
+				<li v-for="message in messages" track-by="$index">{{ message }}</li>
+			</ul>
+				
+
+			<input type="text" v-model="message" v-on:keydown="send">
+		</div>
+
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/1.0.24/vue.min.js"></script>
+		<!-- Client side Socket.io -->
+		<script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>	
+
+		<script>
+
+			var socket = io();
+
+			new Vue({
+				el : '.chat',
+				data: {
+					message: '',
+					messages: []
+				},
+				methods: {
+					send: function(e) {
+						if(e.keyCode != 13) {
+							return;
+						}
+
+						//send
+						socket.emit('message.sent', this.message);
+						
+						this.message = '';
+					}
+				},
+				//listen for an event
+				ready: function () {
+					socket.on('message', function(message) {
+						this.messages.push(message);
+					}.bind(this));
+				}
+			});
+		</script>
+	</body>
+</html>
